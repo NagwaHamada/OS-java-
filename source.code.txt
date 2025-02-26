@@ -1,0 +1,112 @@
+package cpu_scheduling;
+
+import java.util.*;
+class Process {
+    int processId;
+    int burstTime;
+    int priority;
+    int arrivalTime;
+    int oldBurstTime;
+    int waitingTime;
+    int turnaroundTime;
+
+    public Process(int processId, int burstTime, int priority, int arrivalTime) {
+        this.processId = processId;
+        this.oldBurstTime = burstTime;
+        this.burstTime = burstTime;
+        this.priority = priority;
+        this.arrivalTime = arrivalTime;
+    }
+}
+
+public class preemptive_periority {
+    public static void main(String[] args) {
+        Scanner scanner = new Scanner(System.in);
+
+        List<Process> processes = new ArrayList<>();
+        Queue<Process> processQueue = new LinkedList<>();
+
+        System.out.print("Enter the number of processes: ");
+        int numProcesses = scanner.nextInt();
+
+        for (int i = 0; i < numProcesses; i++) {
+            System.out.println("Enter details for process " + (i + 1) + ":");
+
+            System.out.print("Process ID: ");
+            int processId = scanner.nextInt();
+
+            System.out.print("Burst Time: ");
+            int burstTime = scanner.nextInt();
+
+            System.out.print("Priority: ");
+            int priority = scanner.nextInt();
+
+            System.out.print("Arrival Time: ");
+            int arrivalTime = scanner.nextInt();
+
+            Process process = new Process(processId, burstTime, priority, arrivalTime);
+            processes.add(process);
+            processQueue.add(process);
+        }
+
+        scanner.close();
+
+        int currentTime = 0;
+        int totalProcesses = processQueue.size();
+
+        System.out.println("\nProcess Execution Order:\n");
+
+        while (totalProcesses > 0) {
+            int highestPriority = Integer.MAX_VALUE;
+            Process currentProcess = null;
+
+            for (Process process : processQueue) {
+                if (process.arrivalTime <= currentTime && process.priority < highestPriority && process.burstTime > 0) {
+                    highestPriority = process.priority;
+                    currentProcess = process;
+                }
+            }
+
+            if (currentProcess == null) {
+                currentTime++;
+                continue;
+            }
+
+            currentProcess.burstTime--;
+            currentTime++;
+
+            System.out.println("Executing process: " + currentProcess.processId);
+
+            if (currentProcess.burstTime == 0) {
+                currentProcess.turnaroundTime = currentTime - currentProcess.arrivalTime;
+                currentProcess.waitingTime = currentProcess.turnaroundTime - currentProcess.oldBurstTime;
+                totalProcesses--;
+                processQueue.remove(currentProcess);
+            }
+        }
+
+        System.out.println("\nProcess Details:\n");
+        int totalWaitingTime = 0;
+        int totalTurnaroundTime = 0;
+
+        for (Process process : processes) {
+            totalWaitingTime += process.waitingTime;
+            totalTurnaroundTime += process.turnaroundTime;
+
+            System.out.println("Process ID: " + process.processId);
+            System.out.println("Burst Time: " + process.burstTime);
+            System.out.println("Priority: " + process.priority);
+            System.out.println("Arrival Time: " + process.arrivalTime);
+            System.out.println("Waiting Time: " + process.waitingTime);
+            System.out.println("Turnaround Time: " + process.turnaroundTime);
+            System.out.println();
+        }
+
+        double averageWaitingTime = (double) totalWaitingTime / numProcesses;
+        double averageTurnaroundTime = (double) totalTurnaroundTime / numProcesses;
+
+        System.out.println("Average Waiting Time: " + averageWaitingTime);
+        System.out.println("Average Turnaround Time: " + averageTurnaroundTime);
+    }
+}   
+
